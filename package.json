@@ -23,7 +23,9 @@
       "import": "./dist/define.js",
       "require": "./dist/define.cjs"
     },
-    "./murkio.js": "./dist/murkio.js"
+    "./murkio.js": "./dist/murkio.js",
+    "./sri.json": "./dist/sri.json",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"

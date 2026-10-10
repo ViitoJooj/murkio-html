@@ -7,6 +7,7 @@ import { translate } from '../errors';
 import { FlowController, type FlowState } from '../flows';
 import { detectLocale } from '../i18n';
 import { whenReady } from '../murkio';
+import { BaseElement } from './base';
 import type { CanvasDocument, CanvasScreen, PublicConfig } from '../types';
 
 function usable(screen: CanvasScreen, config: PublicConfig | null): boolean {
@@ -37,7 +38,7 @@ const documentStyles = new WeakSet<Document>();
  * do not look inside one). Set the `canvas` property to preview a document
  * without an API (the dashboard editor does this).
  */
-export class MurkioIdentityCanvas extends HTMLElement {
+export class MurkioIdentityCanvas extends BaseElement {
   private container: HTMLElement | ShadowRoot | null = null;
   private view: CanvasView | null = null;
   private stepView: StepView | null = null;

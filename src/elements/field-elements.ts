@@ -7,6 +7,7 @@ import { detectLocale } from '../i18n';
 import { whenReady, type Murkio } from '../murkio';
 import type { CanvasDocument } from '../types';
 import { pickCanvas } from './canvas-element';
+import { BaseElement } from './base';
 
 type Listener = (state: FlowState | null) => void;
 
@@ -146,7 +147,7 @@ class StepDialog {
  * them: the element's `class` is copied to the control, and the element itself
  * uses `display: contents` so it adds no box to the layout.
  */
-abstract class FieldElement<T extends HTMLElement> extends HTMLElement {
+abstract class FieldElement<T extends HTMLElement> extends BaseElement {
   static observedAttributes = ['class', 'placeholder', 'label'];
   protected control: T | null = null;
   protected store: FormStore = formStore();
