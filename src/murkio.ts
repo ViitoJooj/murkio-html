@@ -14,7 +14,7 @@ export interface MurkioOptions {
   apiUrl?: string;
   /** Language of the built-in screens and error messages. Defaults to the page `lang`, then the browser. */
   locale?: string;
-  /** Where to send the user after signing in. Without it the page stays and `murkio:login` fires. */
+  /** Where to send the user after signing in. Without it the page stays and `murkio-login` fires. */
   afterLogin?: string;
   /** Social sign-in comes back here. Must be in the application's redirect URLs. Defaults to the current page. */
   oauthRedirectUrl?: string;

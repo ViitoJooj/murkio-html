@@ -61,8 +61,8 @@ const response = await murkio.fetch('/api/orders'); // your API, with Authorizat
 await murkio.signOut();
 ```
 
-Events (bubbling, composed) on the canvas and on the buttons: `murkio:login`,
-`murkio:error` (`detail.code`), `murkio:step` (`detail.step`: `verify_email`,
+Events (bubbling, composed) on the canvas and on the buttons: `murkio-login`,
+`murkio-error` (`detail.code`), `murkio-step` (`detail.step`: `verify_email`,
 `mfa`, `mfa_enroll`, `recovery_codes`, `forgot`, `reset`).
 
 Canvas attributes: `screen="sign_up"`, `locale="pt-BR"`, `light-dom` (renders

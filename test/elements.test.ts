@@ -40,7 +40,7 @@ describe('<murkio-identity-canvas>', () => {
     const { murkio, calls } = start();
     const element = document.createElement('murkio-identity-canvas');
     const logins: unknown[] = [];
-    element.addEventListener('murkio:login', () => logins.push(true));
+    element.addEventListener('murkio-login', () => logins.push(true));
     document.body.appendChild(element);
 
     const root = element.shadowRoot!;

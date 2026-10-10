@@ -63,11 +63,11 @@ export class FormStore {
     } else {
       this.dialog?.close();
     }
-    if (state.error && state.error !== this.lastError) this.emit('murkio:error', state.error);
+    if (state.error && state.error !== this.lastError) this.emit('murkio-error', state.error);
     this.lastError = state.error;
     if (state.step.name === 'done' && !this.signedIn) {
       this.signedIn = true;
-      this.emit('murkio:login', null);
+      this.emit('murkio-login', null);
     }
   }
 

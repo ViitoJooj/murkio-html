@@ -172,14 +172,14 @@ export class MurkioIdentityCanvas extends BaseElement {
       this.stepView?.root.remove();
       view.root.hidden = true;
       this.stepView = renderStep(this.container, this.document, state, this.flow, this.locale);
-      this.emit('murkio:step', { step: state.step.name });
+      this.emit('murkio-step', { step: state.step.name });
     }
 
-    if (state.error && state.error !== this.lastError) this.emit('murkio:error', state.error);
+    if (state.error && state.error !== this.lastError) this.emit('murkio-error', state.error);
     this.lastError = state.error;
     if (state.step.name === 'done' && !this.signedIn) {
       this.signedIn = true;
-      this.emit('murkio:login', null);
+      this.emit('murkio-login', null);
     }
   }
 
