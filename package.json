@@ -1,0 +1,39 @@
+{
+  "name": "@murkio/html",
+  "version": "0.1.0",
+  "description": "Murkio identity for the browser: the login canvas and the email, password, keep-logged, login and register components as web components, plus the session client.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": [
+    "./dist/cdn.js",
+    "./dist/define.js",
+    "./dist/define.cjs"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./define": {
+      "types": "./dist/define.d.ts",
+      "import": "./dist/define.js",
+      "require": "./dist/define.cjs"
+    },
+    "./murkio.js": "./dist/murkio.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup && node scripts/sri.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@murkio/spec": "0.1.0"
+  }
+}
