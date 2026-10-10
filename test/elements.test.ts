@@ -95,3 +95,31 @@ describe('standalone components', () => {
     expect(calls.find((call) => call.path === '/v1/login')?.body).toEqual({ email: 'ana@example.com', password: 'S3nha!forte' });
   });
 });
+
+describe('inline bootstrap', () => {
+  function inline(generatedAt: number) {
+    const script = document.createElement('script');
+    script.type = 'application/json';
+    script.id = 'murkio-bootstrap';
+    script.dataset.generatedAt = String(generatedAt);
+    script.textContent = JSON.stringify({ ...bootstrap, canvas: { version: 9, document: defaultCanvas } });
+    document.head.appendChild(script);
+    return script;
+  }
+
+  it('uses a fresh inlined bootstrap without calling the API', async () => {
+    const script = inline(Date.now());
+    const { murkio, calls } = start();
+    expect((await murkio.bootstrap()).canvas.version).toBe(9);
+    expect(calls).toHaveLength(0);
+    script.remove();
+  });
+
+  it('ignores an old inlined bootstrap (a static page) and asks the API', async () => {
+    const script = inline(Date.now() - 10 * 60_000);
+    const { murkio, calls } = start();
+    expect((await murkio.bootstrap()).canvas.version).toBe(0);
+    expect(calls.map((call) => call.path)).toEqual(['/v1/client']);
+    script.remove();
+  });
+});

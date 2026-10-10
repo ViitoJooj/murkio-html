@@ -42,6 +42,13 @@ interface CachedBootstrap {
 
 type EventName = 'login' | 'logout' | 'error' | 'mfa';
 const BOOTSTRAP_TTL_MS = 60_000;
+/**
+ * A page can be rendered once and served for a long time (static generation,
+ * CDN caches): its inlined bootstrap would freeze the canvas and the config.
+ * It is only trusted for a short while after the server wrote it; an older one
+ * is ignored and the SDK asks the API.
+ */
+const INLINE_TTL_MS = 120_000;
 const USER_TTL_MS = 60_000;
 
 /**
@@ -164,9 +171,10 @@ export class Murkio {
 
   /**
    * The application id, its public config and the published canvas. The page
-   * may inline it (`<script type="application/json" id="murkio-bootstrap">`,
-   * written by the backend SDKs); otherwise it is fetched once and revalidated
-   * with its ETag, so most page loads cost a 304 at most.
+   * may inline it (`<script type="application/json" id="murkio-bootstrap"
+   * data-generated-at="...">`, written by the backend SDKs); otherwise it is
+   * fetched once and revalidated with its ETag, so most page loads cost a 304
+   * at most.
    */
   bootstrap(): Promise<ClientBootstrap> {
     this.bootstrapping ??= this.loadBootstrap();
@@ -175,7 +183,8 @@ export class Murkio {
 
   private async loadBootstrap(): Promise<ClientBootstrap> {
     const inline = typeof document !== 'undefined' ? document.getElementById('murkio-bootstrap') : null;
-    if (inline?.textContent) {
+    const generatedAt = Number(inline?.dataset.generatedAt);
+    if (inline?.textContent && Number.isFinite(generatedAt) && Math.abs(Date.now() - generatedAt) < INLINE_TTL_MS) {
       try {
         const data = JSON.parse(inline.textContent) as ClientBootstrap;
         if (data?.application_id && data.canvas) return data;
