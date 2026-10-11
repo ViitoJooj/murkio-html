@@ -88,3 +88,17 @@ The canvas is data, never code: the SDK checks it again before drawing (the same
 rules as the server, `libs/spec/canvas`), builds the DOM with `textContent` and the
 CSSOM only, allows `https` links and images and site-relative links, and falls back
 to the default canvas when the published one is not usable.
+
+## Developing
+
+This repository is a git submodule of the Murkio identity service
+(`libs/external/html`) and is developed from there: the JavaScript packages share one
+npm workspace, and the tests read the contract, the vectors and the fixtures every Murkio
+SDK shares (`libs/spec`).
+
+```sh
+# in libs/ of the service repository, cloned with --recurse-submodules
+npm ci
+npm run build
+npm test
+```
