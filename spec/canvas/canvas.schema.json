@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://api.mukio.com/spec/canvas/v1.schema.json",
+  "title": "Murkio identity canvas (schema 1)",
+  "description": "Structural rules of the canvas document. The server (internal/containers/canvases/entities) is the source of truth; cross-reference rules that JSON Schema cannot express (unique ids, every element placed in every layout, items inside the layout, at most 4 data: images, publish rules) are listed in libs/spec/README.md and covered by the fixtures.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "theme", "screens"],
+  "properties": {
+    "schema": { "const": 1 },
+    "theme": { "$ref": "#/$defs/theme" },
+    "screens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sign_in"],
+      "properties": {
+        "sign_in": { "$ref": "#/$defs/screen" },
+        "sign_up": { "$ref": "#/$defs/screen" }
+      }
+    }
+  },
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["font", "radius", "colors"],
+      "properties": {
+        "font": { "enum": ["system-sans", "system-serif", "system-mono", "inherit"] },
+        "radius": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary", "on_primary", "text", "muted", "background", "surface", "border", "error"],
+          "properties": {
+            "primary": { "$ref": "#/$defs/color" },
+            "on_primary": { "$ref": "#/$defs/color" },
+            "text": { "$ref": "#/$defs/color" },
+            "muted": { "$ref": "#/$defs/color" },
+            "background": { "$ref": "#/$defs/color" },
+            "surface": { "$ref": "#/$defs/color" },
+            "border": { "$ref": "#/$defs/color" },
+            "error": { "$ref": "#/$defs/color" }
+          }
+        }
+      }
+    },
+    "label": {
+      "description": "Single-line text: no control characters, no bidi overrides (U+202A-U+202E, U+2066-U+2069), at most 120 characters.",
+      "$ref": "#/$defs/localized",
+      "properties": {
+        "default": { "maxLength": 120 },
+        "i18n": { "additionalProperties": { "maxLength": 120 } }
+      }
+    },
+    "localized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default"],
+      "properties": {
+        "default": { "type": "string", "minLength": 1 },
+        "i18n": {
+          "type": "object",
+          "maxProperties": 20,
+          "propertyNames": { "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "httpsUrl": { "type": "string", "maxLength": 2048, "pattern": "^https://[^\\s\\\\@/]+(/[^\\s\\\\]*)?$" },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "#/$defs/color" },
+        "background": { "$ref": "#/$defs/color" },
+        "border_color": { "$ref": "#/$defs/color" },
+        "border_width": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "radius": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "font_size": { "type": "integer", "minimum": 12, "maximum": 72 },
+        "font_weight": { "enum": [100, 200, 300, 400, 500, 600, 700, 800, 900] },
+        "text_align": { "enum": ["left", "center", "right"] },
+        "padding": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "shadow": { "enum": ["none", "sm", "md", "lg"] }
+      }
+    },
+    "element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,32}$" },
+        "type": {
+          "enum": [
+            "email_input", "password_input", "keep_logged", "login_button", "register_button",
+            "forgot_password_link", "oauth_button", "error_message", "text", "link", "image", "shape", "divider"
+          ]
+        },
+        "props": { "type": ["object", "null"] },
+        "style": { "$ref": "#/$defs/style" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "email_input" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/input" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "password_input" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/password" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "keep_logged" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/keep_logged" } } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["login_button", "register_button", "forgot_password_link"] } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/action" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "oauth_button" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/oauth_button" } } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["error_message", "shape"] } } },
+          "then": { "properties": { "props": { "type": ["object", "null"], "additionalProperties": false } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "text" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/text" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "link" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/link" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "image" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/image" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "divider" } } },
+          "then": { "properties": { "props": { "$ref": "#/$defs/props/divider" } } }
+        }
+      ]
+    },
+    "props": {
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": {
+          "label": { "$ref": "#/$defs/label" },
+          "placeholder": { "$ref": "#/$defs/label" }
+        }
+      },
+      "password": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": {
+          "label": { "$ref": "#/$defs/label" },
+          "placeholder": { "$ref": "#/$defs/label" },
+          "show_toggle": { "type": "boolean" }
+        }
+      },
+      "keep_logged": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": {
+          "label": { "$ref": "#/$defs/label" },
+          "default_checked": { "type": "boolean" }
+        }
+      },
+      "action": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": { "label": { "$ref": "#/$defs/label" } }
+      },
+      "oauth_button": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider"],
+        "properties": {
+          "provider": { "enum": ["google", "github", "apple", "facebook", "x"] },
+          "label": { "$ref": "#/$defs/label" }
+        }
+      },
+      "text": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "description": "Multi-line text (\\n allowed), at most 500 characters.",
+            "$ref": "#/$defs/localized",
+            "properties": {
+              "default": { "maxLength": 500 },
+              "i18n": { "additionalProperties": { "maxLength": 500 } }
+            }
+          },
+          "variant": { "enum": ["", "body", "h1", "h2", "h3"] }
+        }
+      },
+      "link": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "href"],
+        "properties": {
+          "text": { "$ref": "#/$defs/label" },
+          "href": {
+            "anyOf": [
+              { "$ref": "#/$defs/httpsUrl" },
+              { "type": "string", "maxLength": 2048, "pattern": "^/(?![/\\\\])[^\\s\\\\]*$" }
+            ]
+          }
+        }
+      },
+      "image": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["src"],
+        "properties": {
+          "src": {
+            "anyOf": [
+              { "$ref": "#/$defs/httpsUrl" },
+              { "type": "string", "pattern": "^data:image/(png|jpeg|gif);base64,[A-Za-z0-9+/]+={0,2}$" }
+            ]
+          },
+          "alt": { "$ref": "#/$defs/label" }
+        }
+      },
+      "divider": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "label": { "$ref": "#/$defs/label" } }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "w", "h", "z"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "w": { "type": "integer", "minimum": 1 },
+        "h": { "type": "integer", "minimum": 1 },
+        "z": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "hidden": { "type": "boolean" }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "items"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 240, "maximum": 1920 },
+        "height": { "type": "integer", "minimum": 240, "maximum": 2400 },
+        "background": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "color": { "$ref": "#/$defs/color" } }
+        },
+        "items": { "type": "object", "additionalProperties": { "$ref": "#/$defs/item" } }
+      }
+    },
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["elements", "layouts"],
+      "properties": {
+        "elements": { "type": "array", "maxItems": 150, "items": { "$ref": "#/$defs/element" } },
+        "layouts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["desktop"],
+          "properties": {
+            "desktop": { "$ref": "#/$defs/layout" },
+            "mobile": { "$ref": "#/$defs/layout" }
+          }
+        }
+      }
+    }
+  }
+}

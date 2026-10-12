@@ -1,4 +1,4 @@
-import defaultCanvas from '@murkio/spec/canvas/default.json';
+import defaultCanvas from '../../spec/canvas/default.json';
 import { renderCanvas, type CanvasAction, type CanvasView, type FormValues } from '../canvas/render';
 import { renderStep, type StepView } from '../canvas/steps';
 import { adoptStyles, BASE_CSS } from '../canvas/styles';
@@ -47,7 +47,6 @@ export class MurkioIdentityCanvas extends BaseElement {
   private config: PublicConfig | null = null;
   private locale = 'en';
   private observer: ResizeObserver | null = null;
-  private unsubscribe: (() => void) | null = null;
   private preview: unknown = undefined;
   private started = false;
   private lastError: unknown = null;
@@ -110,7 +109,8 @@ export class MurkioIdentityCanvas extends BaseElement {
     }
 
     this.flow = new FlowController(murkio);
-    this.unsubscribe = this.flow.subscribe((state) => this.sync(state));
+    // The flow belongs to this element and goes away with it, so the subscription is never undone.
+    this.flow.subscribe((state) => this.sync(state));
     this.draw();
     this.sync(this.flow.state);
     if (failed) this.view?.setMessage(translate('unknown', this.locale));

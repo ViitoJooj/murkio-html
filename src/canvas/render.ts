@@ -79,7 +79,10 @@ function eyeIcon(): SVGSVGElement {
   svg.setAttribute('aria-hidden', 'true');
   const path = document.createElementNS(ns, 'path');
   path.setAttribute('fill', 'currentColor');
-  path.setAttribute('d', 'M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z');
+  path.setAttribute(
+    'd',
+    'M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+  );
   svg.appendChild(path);
   return svg;
 }
@@ -217,7 +220,11 @@ export function renderCanvas(container: HTMLElement | ShadowRoot, canvas: Canvas
       }
       case 'oauth_button': {
         const provider = String(element.props.provider);
-        const button = el('button', 'mk-button mk-button--secondary', pick(element.props.label as never, locale) || t(locale, 'oauth.continue', { provider: providerName(provider) }));
+        const button = el(
+          'button',
+          'mk-button mk-button--secondary',
+          pick(element.props.label as never, locale) || t(locale, 'oauth.continue', { provider: providerName(provider) }),
+        );
         button.type = 'button';
         button.dataset.provider = provider;
         button.addEventListener('click', () => act({ type: 'oauth', provider }));

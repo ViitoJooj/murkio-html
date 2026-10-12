@@ -85,20 +85,36 @@ without a shadow root, for password managers that do not look inside one).
 ## Security of the canvas
 
 The canvas is data, never code: the SDK checks it again before drawing (the same
-rules as the server, `libs/spec/canvas`), builds the DOM with `textContent` and the
+rules as the server, `spec/canvas`), builds the DOM with `textContent` and the
 CSSOM only, allows `https` links and images and site-relative links, and falls back
 to the default canvas when the published one is not usable.
 
 ## Developing
 
-This repository is a git submodule of the Murkio identity service
-(`libs/external/html`) and is developed from there: the JavaScript packages share one
-npm workspace, and the tests read the contract, the vectors and the fixtures every Murkio
-SDK shares (`libs/spec`).
-
 ```sh
-# in libs/ of the service repository, cloned with --recurse-submodules
-npm ci
-npm run build
+npm ci     # also builds the package (the `prepare` script)
 npm test
 ```
+
+The tests read the contract, the vectors and the fixtures every Murkio SDK shares (the
+native SDKs run the same cases), and the bundle carries the error translations and the
+default canvas from them. That copy (`spec/`) and the checks in `infra/pipeline/` are kept
+in the Murkio identity service and synced from there, so they are not edited here.
+
+The backend SDKs pin the Subresource Integrity hash of `dist/murkio.js`
+(`dist/sri.json`): a change to the bundle is followed by a sync in the identity service
+(`node libs/scripts/sync-cdn.mjs`).
+
+Every pull request runs the workflows in `.github/workflows`. The same checks, locally:
+
+| Workflow | What it runs |
+| --- | --- |
+| Build | `npm run build`, `npm run package:check` (publint) and `npm pack --dry-run`, on Node.js 20 and 24 |
+| Format | `npm run format:check` (Biome; `npm run format` fixes) |
+| Lint | `npm run lint` (Biome), `npm run typecheck` (strict TypeScript) |
+| Tests | `npm test` on Node.js 20 and 24 |
+| Quality & Governance Checks | `for check in infra/pipeline/*.py; do python3 "$check"; done` |
+| Security | `npm audit --omit=dev`, `npm audit --audit-level=high`, `npm audit signatures`, `gitleaks git .`, `zizmor --pedantic .` |
+| CodeQL, Dependency Review | run by GitHub on the pull request |
+
+Security reports: see [SECURITY.md](SECURITY.md).

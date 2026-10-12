@@ -168,7 +168,7 @@ export function renderStep(container: HTMLElement | ShadowRoot, canvas: CanvasDo
   const update = (next: FlowState) => {
     form.setAttribute('aria-busy', String(next.busy));
     for (const control of controls) control.disabled = next.busy;
-    message.textContent = next.error ? translate(next.error.code, locale) : next.notice ?? '';
+    message.textContent = next.error ? translate(next.error.code, locale) : (next.notice ?? '');
     message.style.color = !next.error && next.notice ? 'var(--mk-text)' : '';
     for (const input of form.querySelectorAll('input')) input.setAttribute('aria-invalid', String(next.error !== null));
   };

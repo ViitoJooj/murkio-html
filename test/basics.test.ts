@@ -81,7 +81,9 @@ describe('ApiClient', () => {
   });
 
   it('revalidates the bootstrap with its etag', async () => {
-    const { fetch, calls } = fakeFetch({ 'GET /v1/client': (call) => (call.headers['If-None-Match'] === 'W/"client-1-1"' ? { status: 304 } : { status: 200, body: { data: {} } }) });
+    const { fetch, calls } = fakeFetch({
+      'GET /v1/client': (call) => (call.headers['If-None-Match'] === 'W/"client-1-1"' ? { status: 304 } : { status: 200, body: { data: {} } }),
+    });
     const api = new ApiClient({ publishableKey: 'pk_test', fetch });
     expect((await api.bootstrap('W/"client-1-1"')).notModified).toBe(true);
     expect(calls[0]?.headers['If-None-Match']).toBe('W/"client-1-1"');

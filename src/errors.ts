@@ -1,5 +1,5 @@
-import en from '@murkio/spec/errors/en.json';
-import ptBR from '@murkio/spec/errors/pt-BR.json';
+import en from '../spec/errors/en.json';
+import ptBR from '../spec/errors/pt-BR.json';
 
 export interface ErrorDetail {
   code: string;
@@ -44,9 +44,7 @@ export function translate(code: string, locale = 'en'): string {
 }
 
 export function errorFromResponse(status: number, body: unknown): MurkioError {
-  const details = Array.isArray((body as { details?: unknown })?.details)
-    ? ((body as { details: ErrorDetail[] }).details.filter((d) => typeof d?.code === 'string'))
-    : [];
+  const details = Array.isArray((body as { details?: unknown })?.details) ? (body as { details: ErrorDetail[] }).details.filter((d) => typeof d?.code === 'string') : [];
   return new MurkioError(details[0]?.code ?? 'unknown', status, details);
 }
 

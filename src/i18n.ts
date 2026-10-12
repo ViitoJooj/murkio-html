@@ -33,7 +33,7 @@ const strings = {
     'reset.password': 'New password',
     'reset.submit': 'Save password',
     'reset.done': 'Password changed. Sign in with the new one.',
-    'back': 'Back',
+    back: 'Back',
     'password.show': 'Show password',
     'password.hide': 'Hide password',
     'oauth.continue': 'Continue with {provider}',
@@ -70,7 +70,7 @@ const strings = {
     'reset.password': 'Senha nova',
     'reset.submit': 'Salvar senha',
     'reset.done': 'Senha alterada. Entre com a nova.',
-    'back': 'Voltar',
+    back: 'Voltar',
     'password.show': 'Mostrar senha',
     'password.hide': 'Esconder senha',
     'oauth.continue': 'Continuar com {provider}',
@@ -104,8 +104,7 @@ function language(locale: string): string {
 }
 
 export function t(locale: string, key: StringKey, params: Record<string, string> = {}): string {
-  const table: Record<string, string> =
-    locale in strings ? strings[locale as keyof typeof strings] : language(locale) === 'pt' ? strings['pt-BR'] : strings.en;
+  const table: Record<string, string> = locale in strings ? strings[locale as keyof typeof strings] : language(locale) === 'pt' ? strings['pt-BR'] : strings.en;
   const template = table[key] ?? strings.en[key];
   return template.replace(/\{(\w+)\}/g, (_, name: string) => params[name] ?? '');
 }

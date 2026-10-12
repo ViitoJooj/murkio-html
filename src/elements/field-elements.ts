@@ -1,4 +1,4 @@
-import defaultCanvas from '@murkio/spec/canvas/default.json';
+import defaultCanvas from '../../spec/canvas/default.json';
 import { renderStep, type StepView } from '../canvas/steps';
 import { adoptStyles, BASE_CSS } from '../canvas/styles';
 import { translate } from '../errors';
@@ -98,7 +98,10 @@ class StepDialog {
   private view: StepView | null = null;
   private canvas: CanvasDocument | null = null;
 
-  constructor(private readonly flow: FlowController, private readonly murkio: Murkio) {}
+  constructor(
+    private readonly flow: FlowController,
+    private readonly murkio: Murkio,
+  ) {}
 
   async show(state: FlowState): Promise<void> {
     if (!this.canvas) {
@@ -316,6 +319,6 @@ export class MurkioIdentityError extends FieldElement<HTMLDivElement> {
   protected override stateChanged(state: FlowState | null): void {
     if (!this.control) return;
     const inForm = !state || state.step.name === 'sign_in';
-    this.control.textContent = inForm && state?.error ? translate(state.error.code, this.locale()) : inForm ? state?.notice ?? '' : '';
+    this.control.textContent = inForm && state?.error ? translate(state.error.code, this.locale()) : inForm ? (state?.notice ?? '') : '';
   }
 }
