@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { canSignIn, isSafeHref, sanitizeDocument } from '../src/canvas/validate';
 
-const spec = join(__dirname, '../../../spec/canvas');
+const spec = join(__dirname, '../spec/canvas');
 const read = (path: string) => JSON.parse(readFileSync(path, 'utf8'));
 const fixtures = (kind: string) =>
   readdirSync(join(spec, 'fixtures', kind)).map((file) => ({ file, ...read(join(spec, 'fixtures', kind, file)) }) as { file: string; document: unknown });

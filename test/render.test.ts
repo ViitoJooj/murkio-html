@@ -1,4 +1,4 @@
-import defaultCanvas from '@murkio/spec/canvas/default.json';
+import defaultCanvas from '../spec/canvas/default.json';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { chooseLayout, renderCanvas } from '../src/canvas/render';
 import { sanitizeDocument } from '../src/canvas/validate';
@@ -84,7 +84,11 @@ describe('renderCanvas', () => {
     host.querySelector<HTMLButtonElement>('[data-action=forgot]')!.click();
 
     const values = { email: 'ana@example.com', password: 'secret', keepLogged: true };
-    expect(onAction.mock.calls).toEqual([[{ type: 'login' }, values], [{ type: 'register' }, values], [{ type: 'forgot' }, values]]);
+    expect(onAction.mock.calls).toEqual([
+      [{ type: 'login' }, values],
+      [{ type: 'register' }, values],
+      [{ type: 'forgot' }, values],
+    ]);
   });
 
   it('keeps links on safe destinations and images without referrer', () => {
@@ -115,7 +119,11 @@ describe('renderCanvas', () => {
     expect(email.style.left).toBe('');
     expect(email.style.height).toBe('48px');
 
-    doc.screens.sign_in.layouts.mobile = { width: 320, height: 640, items: Object.fromEntries(doc.screens.sign_in.elements.map((e, i) => [e.id, { x: 0, y: i * 60, w: 320, h: 48, z: 1 }])) };
+    doc.screens.sign_in.layouts.mobile = {
+      width: 320,
+      height: 640,
+      items: Object.fromEntries(doc.screens.sign_in.elements.map((e, i) => [e.id, { x: 0, y: i * 60, w: 320, h: 48, z: 1 }])),
+    };
     expect(chooseLayout(doc.screens.sign_in, 280)).toBe('mobile');
     expect(chooseLayout(doc.screens.sign_in, 200)).toBe('stack');
     expect(chooseLayout(doc.screens.sign_in, 380)).toBe('desktop');

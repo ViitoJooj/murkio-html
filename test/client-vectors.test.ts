@@ -15,12 +15,12 @@ import type { CanvasDocument, LocalizedText, PublicConfig } from '../src/types';
 import { clearCookies } from './helpers';
 
 /**
- * libs/spec/client/vectors.json is what the native SDKs (Flutter, Android,
+ * spec/client/vectors.json is what the native SDKs (Flutter, Android,
  * iOS) are tested against. Running the same cases on the browser code proves
  * the vectors describe what the web really does, so "native draws and behaves
  * like the web" is checked on both ends.
  */
-const spec = join(__dirname, '../../../spec');
+const spec = join(__dirname, '../spec');
 const read = (path: string) => JSON.parse(readFileSync(join(spec, path), 'utf8'));
 const vectors = read('client/vectors.json');
 
@@ -75,7 +75,16 @@ describe('client vectors: small helpers', () => {
 });
 
 describe('client vectors: canvas', () => {
-  for (const [index, entry] of (vectors.layout as { document: string; screen: 'sign_in' | 'sign_up'; width: number; config: PublicConfig | null; oauth: boolean; expect: { layout: string; frame: { width: number; height: number }; order: string[]; paint: string[]; items: Record<string, Rect> } }[]).entries()) {
+  for (const [index, entry] of (
+    vectors.layout as {
+      document: string;
+      screen: 'sign_in' | 'sign_up';
+      width: number;
+      config: PublicConfig | null;
+      oauth: boolean;
+      expect: { layout: string; frame: { width: number; height: number }; order: string[]; paint: string[]; items: Record<string, Rect> };
+    }[]
+  ).entries()) {
     // Only the native SDKs can lack the social sign-in return URL; a browser always has one.
     if (!entry.oauth) continue;
 
@@ -115,7 +124,9 @@ describe('client vectors: canvas', () => {
     });
   }
 
-  for (const [index, entry] of (vectors.visibility as { document: string; screen: 'sign_in' | 'sign_up'; config: PublicConfig | null; oauth: boolean; expect: { visible: string[]; submit: string } }[]).entries()) {
+  for (const [index, entry] of (
+    vectors.visibility as { document: string; screen: 'sign_in' | 'sign_up'; config: PublicConfig | null; oauth: boolean; expect: { visible: string[]; submit: string } }[]
+  ).entries()) {
     if (!entry.oauth) continue;
 
     it(`visibility #${index}: ${entry.document.split('/').pop()} (${entry.screen})`, () => {
@@ -188,18 +199,41 @@ describe('client vectors: flows', () => {
         const current = flow.state.step;
         const token = 'token' in current ? current.token : '';
         switch (step.call) {
-          case 'login': await flow.login(credentials); break;
-          case 'register': await flow.register(credentials); break;
-          case 'confirm_email': await flow.confirmEmail(String(args.code), args.password as string | undefined); break;
-          case 'resend_email': await flow.resendEmail(); break;
-          case 'verify_mfa': await flow.verifyMfa(token, String(args.code)); break;
-          case 'confirm_enrollment': await flow.confirmEnrollment(token, String(args.code)); break;
-          case 'finish_recovery': flow.finishRecovery(); break;
-          case 'forgot': flow.forgot(String(args.email)); break;
-          case 'request_reset': await flow.requestReset(String(args.email)); break;
-          case 'reset_password': await flow.resetPassword(String(args.code), String(args.password)); break;
-          case 'back': flow.back(); break;
-          default: throw new Error(`unknown call ${step.call}`);
+          case 'login':
+            await flow.login(credentials);
+            break;
+          case 'register':
+            await flow.register(credentials);
+            break;
+          case 'confirm_email':
+            await flow.confirmEmail(String(args.code), args.password as string | undefined);
+            break;
+          case 'resend_email':
+            await flow.resendEmail();
+            break;
+          case 'verify_mfa':
+            await flow.verifyMfa(token, String(args.code));
+            break;
+          case 'confirm_enrollment':
+            await flow.confirmEnrollment(token, String(args.code));
+            break;
+          case 'finish_recovery':
+            flow.finishRecovery();
+            break;
+          case 'forgot':
+            flow.forgot(String(args.email));
+            break;
+          case 'request_reset':
+            await flow.requestReset(String(args.email));
+            break;
+          case 'reset_password':
+            await flow.resetPassword(String(args.code), String(args.password));
+            break;
+          case 'back':
+            flow.back();
+            break;
+          default:
+            throw new Error(`unknown call ${step.call}`);
         }
         expect(queue, `${step.call} left requests unsent`).toEqual([]);
 

@@ -7,7 +7,6 @@ export default defineConfig([
     dts: true,
     sourcemap: true,
     target: 'es2020',
-    noExternal: ['@murkio/spec'],
   },
   {
     entry: { murkio: 'src/cdn.ts' },
@@ -16,7 +15,6 @@ export default defineConfig([
     minify: true,
     sourcemap: true,
     target: 'es2020',
-    noExternal: ['@murkio/spec'],
     outExtension: () => ({ js: '.js' }),
   },
 ]);

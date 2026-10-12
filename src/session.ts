@@ -247,9 +247,12 @@ export class SessionManager {
     this.timer = null;
     if (!session) return;
     const delay = Math.max(0, session.expiresAt - REFRESH_MARGIN_MS - this.now());
-    this.timer = setTimeout(() => {
-      this.timer = null;
-      if (typeof document === 'undefined' || document.visibilityState === 'visible') void this.refreshIfDue();
-    }, Math.min(delay, 2_147_483_647));
+    this.timer = setTimeout(
+      () => {
+        this.timer = null;
+        if (typeof document === 'undefined' || document.visibilityState === 'visible') void this.refreshIfDue();
+      },
+      Math.min(delay, 2_147_483_647),
+    );
   }
 }

@@ -1,4 +1,4 @@
-import defaultCanvas from '@murkio/spec/canvas/default.json';
+import defaultCanvas from '../spec/canvas/default.json';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { defineElements } from '../src/elements/define';
 import { init, reset } from '../src/murkio';

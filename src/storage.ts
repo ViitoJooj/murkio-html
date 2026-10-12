@@ -73,6 +73,7 @@ export function writeCookie(name: string, value: string, attributes: CookieAttri
   if (attributes.domain) cookie += `; Domain=${attributes.domain}`;
   if (attributes.secure) cookie += '; Secure';
   try {
+    // biome-ignore lint/suspicious/noDocumentCookie: the Cookie Store API is asynchronous and not in every browser, and the server must see this cookie on the very next navigation
     document.cookie = cookie;
   } catch {
     /* cookies unavailable */

@@ -4,5 +4,4 @@
  * HTMLElement` would throw on import; this stand-in lets the module load there,
  * and defineElements() never registers anything without a browser.
  */
-export const BaseElement: typeof HTMLElement =
-  typeof HTMLElement === 'undefined' ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
+export const BaseElement: typeof HTMLElement = typeof HTMLElement === 'undefined' ? (class {} as unknown as typeof HTMLElement) : HTMLElement;

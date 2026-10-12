@@ -5,14 +5,25 @@ import type { CanvasDocument, CanvasElement, CanvasLayout, CanvasScreen, CanvasS
  * again before drawing it on the customer's page (defense in depth: a bug or a
  * compromised dashboard must not become script, a fake link or an invisible
  * overlay on every login page). The rules mirror the server's structural ones
- * (libs/spec/canvas); an element that breaks them is dropped, a style value out
+ * (spec/canvas); an element that breaks them is dropped, a style value out
  * of range is ignored, and a document without what a login needs is refused so
  * the caller falls back to the default canvas.
  */
 
 export const ELEMENT_TYPES: readonly ElementType[] = [
-  'email_input', 'password_input', 'keep_logged', 'login_button', 'register_button', 'forgot_password_link',
-  'oauth_button', 'error_message', 'text', 'link', 'image', 'shape', 'divider',
+  'email_input',
+  'password_input',
+  'keep_logged',
+  'login_button',
+  'register_button',
+  'forgot_password_link',
+  'oauth_button',
+  'error_message',
+  'text',
+  'link',
+  'image',
+  'shape',
+  'divider',
 ];
 const PROVIDERS = ['google', 'github', 'apple', 'facebook', 'x'];
 const FONTS = ['system-sans', 'system-serif', 'system-mono', 'inherit'];
@@ -28,10 +39,8 @@ export function isColor(value: unknown): value is string {
   return typeof value === 'string' && COLOR.test(value);
 }
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-const isInt = (value: unknown, low: number, high: number): value is number =>
-  typeof value === 'number' && Number.isInteger(value) && value >= low && value <= high;
+const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+const isInt = (value: unknown, low: number, high: number): value is number => typeof value === 'number' && Number.isInteger(value) && value >= low && value <= high;
 
 function cleanText(value: unknown, maxChars: number, multiline: boolean): boolean {
   if (typeof value !== 'string' || value.trim() === '' || [...value].length > maxChars) return false;
@@ -154,8 +163,14 @@ function cleanLayout(value: unknown, problems: string[], path: string): CanvasLa
   const items: CanvasLayout['items'] = {};
   for (const [id, item] of Object.entries(value.items)) {
     if (
-      isObject(item) && isInt(item.x, 0, value.width) && isInt(item.y, 0, value.height) && isInt(item.w, 1, value.width) &&
-      isInt(item.h, 1, value.height) && item.x + item.w <= value.width && item.y + item.h <= value.height && isInt(item.z, 0, 1000)
+      isObject(item) &&
+      isInt(item.x, 0, value.width) &&
+      isInt(item.y, 0, value.height) &&
+      isInt(item.w, 1, value.width) &&
+      isInt(item.h, 1, value.height) &&
+      item.x + item.w <= value.width &&
+      item.y + item.h <= value.height &&
+      isInt(item.z, 0, 1000)
     ) {
       items[id] = { x: item.x, y: item.y, w: item.w, h: item.h, z: item.z, hidden: item.hidden === true };
     } else {
@@ -174,7 +189,7 @@ function cleanScreen(value: unknown, problems: string[], path: string, images: {
 
   const desktop = cleanLayout(value.layouts.desktop, problems, `${path}.layouts.desktop`);
   if (!desktop) return null;
-  const mobile = value.layouts.mobile === undefined ? undefined : cleanLayout(value.layouts.mobile, problems, `${path}.layouts.mobile`) ?? undefined;
+  const mobile = value.layouts.mobile === undefined ? undefined : (cleanLayout(value.layouts.mobile, problems, `${path}.layouts.mobile`) ?? undefined);
 
   if (value.elements.length > MAX_ELEMENTS) problems.push(`${path}.elements: more than ${MAX_ELEMENTS} elements`);
 
@@ -245,7 +260,7 @@ export function sanitizeDocument(value: unknown): SanitizeResult {
   const images = { count: 0 };
   const signIn = cleanScreen(value.screens.sign_in, problems, 'screens.sign_in', images);
   if (!signIn) return { document: null, problems };
-  const signUp = value.screens.sign_up === undefined ? undefined : cleanScreen(value.screens.sign_up, problems, 'screens.sign_up', images) ?? undefined;
+  const signUp = value.screens.sign_up === undefined ? undefined : (cleanScreen(value.screens.sign_up, problems, 'screens.sign_up', images) ?? undefined);
 
   const document: CanvasDocument = {
     schema: 1,
