@@ -1,9 +1,11 @@
 import { ApiClient } from './client';
 import { asMurkioError, MurkioError } from './errors';
 import { fnv1a32 } from './hash';
+import defaultCanvas from '../spec/canvas/default.json';
 import { detectLocale } from './i18n';
 import { codeChallenge, randomString } from './pkce';
 import { SessionManager } from './session';
+import { checkCanvas, type CanvasPin, type Jwk } from './signature';
 import { readJSON, store } from './storage';
 import type { AccessClaims, ClientBootstrap, LoginResult, Me, MFAChallenge } from './types';
 
@@ -20,6 +22,12 @@ export interface MurkioOptions {
   oauthRedirectUrl?: string;
   /** Shares the session cookie with subdomains (e.g. `.example.com`). Read the README first. */
   cookieDomain?: string;
+  /**
+   * Refuse a canvas that comes without a signature even the first time. Off by
+   * default: the SDK already refuses an unsigned canvas from an application
+   * that has signed before, so this only matters for the very first load.
+   */
+  requireSignedCanvas?: boolean;
   fetch?: typeof fetch;
 }
 
@@ -50,6 +58,7 @@ const BOOTSTRAP_TTL_MS = 60_000;
  */
 const INLINE_TTL_MS = 120_000;
 const USER_TTL_MS = 60_000;
+const JWKS_TTL_MS = 300_000;
 
 /**
  * Murkio is the browser client of one application. Create it once with
@@ -182,6 +191,53 @@ export class Murkio {
   }
 
   private async loadBootstrap(): Promise<ClientBootstrap> {
+    return this.authenticate(await this.fetchBootstrap());
+  }
+
+  /**
+   * Checks the canvas signature (libs/spec/canvas/SIGNATURE.md). A canvas that
+   * does not verify is replaced by the default one, which ships with the SDK,
+   * so the login keeps working.
+   */
+  private async authenticate(data: ClientBootstrap): Promise<ClientBootstrap> {
+    const pinKey = `murkio.${this.keyHash}.canvas`;
+    const verdict = await checkCanvas({
+      applicationId: data.application_id,
+      canvas: data.canvas,
+      jwks: (refresh) => this.jwks(data.jwks_url, refresh),
+      pinned: readJSON<CanvasPin>('localStorage', pinKey),
+      strict: this.options.requireSignedCanvas,
+    });
+
+    if (verdict.use === 'signed') {
+      store.set('localStorage', pinKey, JSON.stringify(verdict.pin));
+      return { ...data, canvas: { ...data.canvas, document: verdict.document as ClientBootstrap['canvas']['document'] } };
+    }
+    if (verdict.use === 'default') {
+      console.error('[murkio] the canvas did not pass the signature check; drawing the default one.');
+      return { ...data, canvas: { version: 0, document: defaultCanvas as unknown as ClientBootstrap['canvas']['document'] } };
+    }
+    return data;
+  }
+
+  private async jwks(url: string, refresh: boolean): Promise<Jwk[]> {
+    const key = `murkio.${this.keyHash}.jwks`;
+    const cached = readJSON<{ at: number; keys: Jwk[] }>('localStorage', key);
+    if (cached && !refresh && Date.now() - cached.at < JWKS_TTL_MS) return cached.keys;
+
+    try {
+      const response = await (this.options.fetch ?? fetch)(new URL(url, `${this.api.apiUrl}/`).toString(), { credentials: 'omit' });
+      if (!response.ok) throw new Error(`jwks ${response.status}`);
+      const keys = ((await response.json()) as { keys?: Jwk[] }).keys ?? [];
+      store.set('localStorage', key, JSON.stringify({ at: Date.now(), keys }));
+      return keys;
+    } catch (error) {
+      if (cached) return cached.keys;
+      throw error;
+    }
+  }
+
+  private async fetchBootstrap(): Promise<ClientBootstrap> {
     const inline = typeof document !== 'undefined' ? document.getElementById('murkio-bootstrap') : null;
     const generatedAt = Number(inline?.dataset.generatedAt);
     if (inline?.textContent && Number.isFinite(generatedAt) && Math.abs(Date.now() - generatedAt) < INLINE_TTL_MS) {

@@ -93,7 +93,7 @@ export interface ClientBootstrap {
   issuer: string;
   jwks_url: string;
   config: PublicConfig;
-  canvas: { version: number; document: CanvasDocument };
+  canvas: { version: number; document: CanvasDocument; signature?: string };
 }
 
 export interface TokenPair {

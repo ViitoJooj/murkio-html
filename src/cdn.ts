@@ -10,8 +10,8 @@ export * from './index';
  *   <script src=".../murkio.js" data-murkio-key="pk_..." defer></script>
  *   <murkio-identity-canvas></murkio-identity-canvas>
  *
- * Optional: data-murkio-api, data-murkio-locale, data-murkio-after-login and
- * data-murkio-oauth-redirect.
+ * Optional: data-murkio-api, data-murkio-locale, data-murkio-after-login,
+ * data-murkio-oauth-redirect and data-murkio-require-signed-canvas.
  */
 const script = typeof document !== 'undefined' ? (document.currentScript as HTMLScriptElement | null) : null;
 const key = script?.dataset.murkioKey;
@@ -22,6 +22,7 @@ if (key) {
     locale: script?.dataset.murkioLocale,
     afterLogin: script?.dataset.murkioAfterLogin,
     oauthRedirectUrl: script?.dataset.murkioOauthRedirect,
+    requireSignedCanvas: script?.dataset.murkioRequireSignedCanvas !== undefined,
   });
 }
 defineElements();
