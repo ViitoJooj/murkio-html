@@ -30,6 +30,13 @@ Optional attributes on the script: `data-murkio-api` (API URL), `data-murkio-loc
 `data-murkio-oauth-redirect` (social sign-in return URL; it must be in the
 application's redirect URLs, and defaults to the current page).
 
+The canvas comes signed by your application's key, and the SDK checks it against the
+application's JWKS before drawing it. There is nothing to configure: a canvas that does not
+verify is replaced by the default one. Once an application has sent a signature, an unsigned
+canvas is refused, and so is an older version than the one already seen. To refuse an unsigned
+canvas even the first time, add `data-murkio-require-signed-canvas` (or `requireSignedCanvas`
+in `init()`). Browsers without Ed25519 in WebCrypto draw the canvas as received.
+
 ## Your own layout
 
 Use the components and style them with your own classes (Tailwind works: the

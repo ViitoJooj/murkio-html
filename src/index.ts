@@ -8,6 +8,8 @@ export { fnv1a32 } from './hash';
 export { decodeClaims } from './jwt';
 export { getMurkio, init, Murkio, reset, whenReady } from './murkio';
 export type { MurkioOptions } from './murkio';
+export { checkCanvas } from './signature';
+export type { CanvasPin, CanvasVerdict } from './signature';
 export { cookieNames, SessionManager } from './session';
 export type { CookieNames, StoredSession } from './session';
 export { chooseLayout, renderCanvas } from './canvas/render';
